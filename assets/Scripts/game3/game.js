@@ -37,7 +37,7 @@ cc.Class({
         //这个预制体是否可以改变状态比如旋转，移动
         this.IsChange = true;
         //保存临时的形状
-        this.shapeNode = new Shape(this.node,-this.prefabHeight,this.nodeHeight/2 - this.prefabHeight);
+        this.shapeNode = new Shape(this.node,this.createRandomX(this.createRandom(0,6)),this.nodeHeight/2 - this.prefabHeight);
         //存放每次生成的预制体数组
         this.nodeArr =this.createShape(this.shapeNode);
         //将x的所有可能坐标存到一个数组里面
@@ -46,6 +46,18 @@ cc.Class({
         this.createBack();
         //创建下一个旋转体
         this.nextShape = new Shape(this.nextShape,0,0);
+    },
+    //产生x坐标为[-250,-150,-50,50,150,250]
+    createRandomX : function(randomNumber){
+        var XArray = [];
+        for(var i = 0;i < 6;i++){
+            XArray.push((-this.nodeWidth/2 + this.prefabHeight) + i * 100);
+        }
+        return XArray[randomNumber];
+    },
+    //产生随机数
+    createRandom : function(min,max){
+         return Math.floor(Math.random()*(max - min) + min);
     },
     //将四个可能的点位加入到相对应的数组中去
     addPointXOrY : function(locationSet,nodeArr){
@@ -120,7 +132,7 @@ cc.Class({
             cc.log("offSet is " + offSet);
             //产生0-3的随机数
             var index = Math.floor(Math.random()*3);
-            cc.log("inde is " + index);
+            cc.log("index is " + index);
             //将对应的预制体取出来转化为节点然后显示
             var prefabNode = this.createPrefab(this.prefabArr[index]);
             cc.log("x is " + shape.x + " and y is "+ shape.y - offSet);
@@ -192,7 +204,7 @@ cc.Class({
                 //修改可改变状态为false
                 this.shapeNode.allowRotate = false;
                 //如果触底就显示或者生成下一个,将nodeArr重置,新建一个形状
-                this.shapeNode = new Shape(this.node,-this.prefabHeight,this.nodeHeight/2 - this.prefabHeight);
+                this.shapeNode = new Shape(this.node,this.createRandomX(this.createRandom(0,6)),this.nodeHeight/2 - this.prefabHeight);
                 this.nodeArr = this.createShape(this.shapeNode);
                 //将网格中被填充的标记为true
                 this.setGridFilled();
@@ -202,7 +214,6 @@ cc.Class({
     //旋转方法
     rotate       : function(){
         //判断周围的网格状态是否为true
-        
         //保留之前的坐标节点作为旋转的基础
         cc.log("中心点的坐标为：" + this.nodeArr[1].x + "," + this.nodeArr[1].y);
         //第一个预制体节点的x,y坐标
