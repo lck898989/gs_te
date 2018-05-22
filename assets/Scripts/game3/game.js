@@ -33,7 +33,7 @@ cc.Class({
         //形状集合二维数组,将每次生成的形状添加到二维数组里面
         this.shapeArr = [];
         //预制体的下落速度
-        this.speed = 10;
+        this.speed = 100;
         //这个预制体是否可以改变状态比如旋转，移动
         this.IsChange = true;
         //保存临时的形状
@@ -46,6 +46,7 @@ cc.Class({
         this.createBack();
         //创建下一个旋转体
         this.nextShape = new Shape(this.nextShape,0,0);
+        this.downFunction();
     },
     //产生x坐标为[-250,-150,-50,50,150,250]
     createRandomX : function(randomNumber){
@@ -72,7 +73,7 @@ cc.Class({
                     //如果当前网格的坐标等于节点数组中的坐标就把当前节点预制体的状态改为true
                     if((this.backGrid[i][j].x === this.nodeArr[k].x) && (this.backGrid[i][j].y === this.nodeArr[k].y)){
                            //将网格的填充状态重置为true
-                           this.backGrid[i][j].getComponent("Back").isFilled = true;
+                           this.backGrid[i][j].getComponent("Back").isFilled = 1;
                         //    //返回不可下落状态
                         //    return false;
                     }
@@ -95,17 +96,19 @@ cc.Class({
             //设置它的y坐标
             var tempY =y - i * this.prefabHeight*2;
             cc.log("tempY is " + tempY);
-            var outArr = this.backGroundArr[i];
+            this.backGroundArr[i] = [];
             for(var j = 0; j < 6;j++){
-                outArr = [];
+                var outArr = this.backGroundArr[i];
                 var tempX = x + j * this.prefabHeight*2;
                 cc.log("tempX is " + tempX);
                 //y坐标不变，x坐标要变
                 var tempPrefab = this.setPrefabPosition(this.backPrefab,tempX,tempY,this.node);
+                tempPrefab.isFilled = 0;
                 outArr[j]=tempPrefab;
                 // outArr[j] = 
             }
         }
+        cc.log("backGroundArr is " +this.backGroundArr);
     },
     /**
     @param prefab:将要生成预制节点的预制体
@@ -145,7 +148,6 @@ cc.Class({
         }
         console.log(prefabArrTemp);
         //将当前生成的预制体拼成的形状加到形状数组中去
-
         this.shapeArr.push(prefabArrTemp);
         cc.log("shapeArr is " + this.shapeArr);
         //显示下一个预制体拼成的图形
@@ -155,9 +157,17 @@ cc.Class({
     // called every frame
     update: function (dt) {
         //如果当前状态是处于可以改变状态
-        if(this.shapeNode.allowRotate){
-            this.updatePrefatY(dt);
-        }
+        // if(this.shapeNode.allowRotate){
+        //     this.updatePrefatY(dt);
+        // }
+        
+    },
+    //定时器控制下落
+    downFunction : function(){
+        //一秒下落一次
+        this.schedule(function(){
+            this.updatePrefatY();
+        },1);
     },
     checkAroundStatu : function(){
         for(var i = 0;i < 12;i++){
@@ -176,7 +186,7 @@ cc.Class({
                 // }
                 //如果x坐标一样只比较最下面的y坐标
                 if((this.nodeArr[0].x === this.nodeArr[1].x)&&(this.nodeArr[2].x === this.nodeArr[1].x)){
-                    if(this.backGrid[i + 1][j].getComponent("Back").isFilled === true){
+                    if(this.backGrid[i + 1][j].getComponent("Back").isFilled === 0){
                         return false;
                     }
                 }
@@ -231,10 +241,17 @@ cc.Class({
         this.nodeArr[2].x = this.nodeArr[1].y - this.nodeArr[2].y + this.nodeArr[1].x;
         this.nodeArr[2].y = changeBeforeX2 - this.nodeArr[1].x + this.nodeArr[1].y;
     },
+    afterRotate : function(n,nChangeBoforeX){
+            //遍历预制节点数组使它的x,y坐标都进行旋转，将第一个预制节点进行旋转
+            this.nodeArr[i].x = this.nodeArr[1].y - this.nodeArr[i].y + this.nodeArr[1].x;
+            cc.log("旋转后的x坐标是："+ this.nodeArr[0].x);
+            this.nodeArr[i].y = nChangeBoforeX - this.nodeArr[1].x + this.nodeArr[1].y;
+            cc.log("旋转后的y坐标是:" + this.nodeArr[0]);
+    },
     //左移方法
     moveLeft    : function(){
         for(var i = 0;i < this.nodeArr.length;i++){
-            this.nodeArr[i].x -= this.speed*10;
+            this.nodeArr[i].x -= this.speed;
             if((this.nodeArr[i].x <= -this.nodeWidth/2 + this.prefabHeight)){
                 this.nodeArr[i].x = -this.nodeWidth/2 + this.prefabHeight;
             }
@@ -242,7 +259,7 @@ cc.Class({
     },
     moveRight   : function(){
         for(var i = 0;i < this.nodeArr.length;i++){
-            this.nodeArr[i].x += this.speed*10;
+            this.nodeArr[i].x += this.speed;
             if((this.nodeArr[i].x >= this.nodeWidth/2 - this.prefabHeight)){
                 this.nodeArr[i].x = this.nodeWidth/2 - this.prefabHeight;
             }

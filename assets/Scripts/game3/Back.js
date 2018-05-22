@@ -3,7 +3,7 @@ cc.Class({
 
     properties: {
         //该方格是否已经填充东西初始化为false
-        isFilled : false,
+        isFilled : 0,
     },
 
     // LIFE-CYCLE CALLBACKS:
