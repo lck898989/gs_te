@@ -511,22 +511,22 @@ cc.Class({
         if(row.length === 1){
             //遍历它的数组的状态
             //遍历三个行对应的左一行是否为1
-            var nc = col[0];
+            var nc = col[2];
             //当列数是左边界是不用判断左边的背景网格的状态的
-            if(nc != 0){
+            if(nc != 5){
                 //判断一下下一行的状态
-                if(this.backGroundArr[row[0]][nc - 1].isFilled === 1){
+                if(this.backGroundArr[row[0]][nc + 1].isFilled === 1){
                     //不允许向左移动
                     return false;
                 }
             }
         }else if(col.length === 1){
-            //如果列的个数为1的话
+            //如果列的个数为1的话说明是竖条的形状
             for(var m = 0;m<row.length;m++){
                 //获得行数
                 var mr = row[m];
                 //只要一个方格的左边的背景方格的状态为1的话就停止移动
-                if(this.backGroundArr[mr][col[0] - 1].isFilled === 1){
+                if(this.backGroundArr[mr][col[0] + 1].isFilled === 1){
                     //一个方格的左边背景方格的状态是1的话就说明不可以向左边移动
                     return false;
                 }
