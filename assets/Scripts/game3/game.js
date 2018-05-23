@@ -342,7 +342,11 @@ cc.Class({
         }
         return arr;
     },
-    //旋转方法
+    /**
+        1：旋转的时候判断旋转的坐标对应的背景方格的状态是否为1
+        2：当竖条出现在最左边的时候改变旋转中心为最上面的预制体节点
+        3：当竖条出现在最右边的时候改变旋转中心为最下面的预制节点
+    **/
     rotate       : function(){
         //判断周围的网格状态是否为true
         //保留之前的坐标节点作为旋转的基础
@@ -353,14 +357,17 @@ cc.Class({
         //第二个预制体节点的x,y坐标
         var changeBeforeX2 = this.nodeArr[2].x;
         var changeBeforeY2 = this.nodeArr[2].y;
-        //遍历预制节点数组使它的x,y坐标都进行旋转，将第一个预制节点进行旋转
-        this.nodeArr[0].x = this.nodeArr[1].y - this.nodeArr[0].y + this.nodeArr[1].x;
-        cc.log("旋转后的x坐标是："+ this.nodeArr[0].x);
-        this.nodeArr[0].y = changeBeforeX - this.nodeArr[1].x + this.nodeArr[1].y;
-        cc.log("旋转后的y坐标是："+this.nodeArr[0].y);
-        //将第二个预制节点进行旋转
-        this.nodeArr[2].x = this.nodeArr[1].y - this.nodeArr[2].y + this.nodeArr[1].x;
-        this.nodeArr[2].y = changeBeforeX2 - this.nodeArr[1].x + this.nodeArr[1].y;
+        if(this.getColumn() != 0 && this.getColumn() != 5){
+            //遍历预制节点数组使它的x,y坐标都进行旋转，将第一个预制节点进行旋转
+            this.nodeArr[0].x = this.nodeArr[1].y - this.nodeArr[0].y + this.nodeArr[1].x;
+            cc.log("旋转后的x坐标是："+ this.nodeArr[0].x);
+            this.nodeArr[0].y = changeBeforeX - this.nodeArr[1].x + this.nodeArr[1].y;
+            cc.log("旋转后的y坐标是："+this.nodeArr[0].y);
+            //将第二个预制节点进行旋转
+            this.nodeArr[2].x = this.nodeArr[1].y - this.nodeArr[2].y + this.nodeArr[1].x;
+            this.nodeArr[2].y = changeBeforeX2 - this.nodeArr[1].x + this.nodeArr[1].y;
+        }
+        
     },
     //左移方法
     moveLeft    : function(){
@@ -539,4 +546,36 @@ cc.Class({
         return this.createShape(parentNode,x,y);
 
     },
+    //通过列号获得对应的X坐标
+    getLocationByCol:function(colNumber){
+        switch(currentCol){
+            case 0:
+                return -250;
+            case 1:
+                return -150;  
+            case 3:
+                return -50;
+            case 4:
+                return 50;   
+            case 5:
+                return 150;
+            case 6:
+                return 250;             
+        }
+    },
+    //快速下落:横条快速下落，竖条快速下落
+    quickDown : function(){
+        //获得当前列
+        var currentCol = this.getColumn();
+        if(currentCol.length === 1){
+            var targetX = this.getLocationByCol(currentCol);
+            for(var i = 0;i<3;i++){
+                this.nodeArr[i].x = targetX;
+                // this.nodeArr[i].y = 
+            }
+        }else{
+
+        }
+        
+    }
 });
