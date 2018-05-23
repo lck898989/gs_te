@@ -124,6 +124,12 @@ cc.Class({
         }
         return yIndexResult;
     },
+    /***
+        根据y坐标数值得到对应的行
+        返回对应的行数
+        @param : y 传入方法中的y坐标
+        @return 返回坐标对应的行号
+    * */
     chooseRawByLocation : function(y){
         switch(y){
             case -550:
@@ -152,41 +158,41 @@ cc.Class({
                 return 0;    
         }
     },
-    //检查是否触底
-    setGridFilled : function(){
-        //获得当前下落的网格位置处于哪一列节省遍历次数
-        var indexArr = [];
-        indexArr = this.getColumn();
-        if(indexArr.length === 1){
-            //说明是竖条,获得列数
-            var column = indexArr[0];
-            cc.log("column is " + column);
-            cc.log("this.backGridArr is " + this.backGridArr);
-            for(var i = 9;i< 12;i++){
-                this.backGroundArr[i][column].isFilled = 1;
-            }
-        }else{
-            for(var m = 0;m < 3;m++){
-                var col = indexArr[m];
-            }
-        }
-        for(var i = 0;i < 12;i++){
-            //列检查
-            for(var j = 0;j < 6;j++){
-                for(var k = 0;k < this.nodeArr.length;k++){
-                    //如果当前网格的坐标等于节点数组中的坐标就把当前节点预制体的状态改为true
-                    if((this.backGroundArr[i][j].x === this.nodeArr[k].x) && (this.backGroundArr[i][j].y === this.nodeArr[k].y)){
-                           //将网格的填充状态重置为true
-                           this.backGroundArr[i][j].getComponent("Back").isFilled = 1;
-                        //    //返回不可下落状态
-                        //    return false;
-                    }
-                }
-            }
-        }
-        // //返回可下落状态 
-        // return true;
-    },
+    // //检查是否触底
+    // setGridFilled : function(){
+    //     //获得当前下落的网格位置处于哪一列节省遍历次数
+    //     var indexArr = [];
+    //     indexArr = this.getColumn();
+    //     if(indexArr.length === 1){
+    //         //说明是竖条,获得列数
+    //         var column = indexArr[0];
+    //         cc.log("column is " + column);
+    //         cc.log("this.backGridArr is " + this.backGridArr);
+    //         for(var i = 9;i< 12;i++){
+    //             this.backGroundArr[i][column].isFilled = 1;
+    //         }
+    //     }else{
+    //         for(var m = 0;m < 3;m++){
+    //             var col = indexArr[m];
+    //         }
+    //     }
+    //     for(var i = 0;i < 12;i++){
+    //         //列检查
+    //         for(var j = 0;j < 6;j++){
+    //             for(var k = 0;k < this.nodeArr.length;k++){
+    //                 //如果当前网格的坐标等于节点数组中的坐标就把当前节点预制体的状态改为true
+    //                 if((this.backGroundArr[i][j].x === this.nodeArr[k].x) && (this.backGroundArr[i][j].y === this.nodeArr[k].y)){
+    //                        //将网格的填充状态重置为true
+    //                        this.backGroundArr[i][j].getComponent("Back").isFilled = 1;
+    //                     //    //返回不可下落状态
+    //                     //    return false;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     // //返回可下落状态 
+    //     // return true;
+    // },
     //初始化游戏场景主背景12行6列的网格
     createBack : function(){
         //初始化y坐标
@@ -318,8 +324,6 @@ cc.Class({
                 this.nodeArr[j].y -= this.speed;
             }
         }
-        
-        
     },
 
     /*创建一个二维数组的方法
@@ -358,31 +362,34 @@ cc.Class({
         this.nodeArr[2].x = this.nodeArr[1].y - this.nodeArr[2].y + this.nodeArr[1].x;
         this.nodeArr[2].y = changeBeforeX2 - this.nodeArr[1].x + this.nodeArr[1].y;
     },
-    // afterRotate : function(n,nChangeBoforeX){
-    //         //遍历预制节点数组使它的x,y坐标都进行旋转，将第一个预制节点进行旋转
-    //         this.nodeArr[i].x = this.nodeArr[1].y - this.nodeArr[i].y + this.nodeArr[1].x;
-    //         cc.log("旋转后的x坐标是："+ this.nodeArr[0].x);
-    //         this.nodeArr[i].y = nChangeBoforeX - this.nodeArr[1].x + this.nodeArr[1].y;
-    //         cc.log("旋转后的y坐标是:" + this.nodeArr[0]);
-    // },
     //左移方法
     moveLeft    : function(){
         for(var i = 0;i < this.nodeArr.length;i++){
-            this.nodeArr[i].x -= this.speed;
-            if((this.nodeArr[i].x <= -this.nodeWidth/2 + this.prefabHeight)){
-                this.nodeArr[i].x = -this.nodeWidth/2 + this.prefabHeight;
+            if(this.CheckIsLeft()){
+                this.nodeArr[i].x -= this.speed;
+                if((this.nodeArr[i].x <= -this.nodeWidth/2 + this.prefabHeight)){
+                    this.nodeArr[i].x = -this.nodeWidth/2 + this.prefabHeight;
+                }
             }
         }
     },
+    //右移方法
     moveRight   : function(){
         for(var i = 0;i < this.nodeArr.length;i++){
-            this.nodeArr[i].x += this.speed;
-            if((this.nodeArr[i].x >= this.nodeWidth/2 - this.prefabHeight)){
-                this.nodeArr[i].x = this.nodeWidth/2 - this.prefabHeight;
+            if(this.CheckIsRight()){
+                this.nodeArr[i].x += this.speed;
+                if((this.nodeArr[i].x >= this.nodeWidth/2 - this.prefabHeight)){
+                    this.nodeArr[i].x = this.nodeWidth/2 - this.prefabHeight;
+                }
             }
         }
     },
-    //检测是否可以向下移动
+    /**
+        检测是否可以向下移动
+        返回true或者false
+        @return true  : 可以下落
+        @return false : 不可以下落
+    **/
     CheckIsDown : function(){
         //获得当前的行数
         var row = this.getRow();
@@ -457,7 +464,9 @@ cc.Class({
         //固定完之后重新生成随机预制体节点
         this.nodeArr = this.generateNext(this.node,this.createRandomX(this.createRandom(0,6)),this.nodeHeight/2 - this.prefabHeight);
     },
-    //检测是否可以向左移动
+    /**
+       检测是否可以向左移动
+    **/
     CheckIsLeft : function(){
         //获得当前的行数
         var row = this.getRow();
@@ -467,74 +476,67 @@ cc.Class({
         //如果是横着的条就检测下面三个背景方格的属性isFilled是不是为1如果为1的话不允许下落
         if(row.length === 1){
             //遍历它的数组的状态
-            //遍历三个列对应的下一行是否为1
-            for(var j = 0;j<col.length;j++){
-                var nc = col[j];
-                if(nc != 0 || nc != 5){
-                    //判断一下下一行的状态
-                    if(this.backGroundArr[row[0]][nc + 1].isFilled === 1){
-                        //如果下方方格有一个状态为1的时候将返回不能下落并改变背景方格的状态
-                        this.changeBackBlockStatus();
-                        return false;
-                    }
+            //遍历三个行对应的左一行是否为1
+            var nc = col[0];
+            //当列数是左边界是不用判断左边的背景网格的状态的
+            if(nc != 0){
+                //判断一下下一行的状态
+                if(this.backGroundArr[row[0]][nc - 1].isFilled === 1){
+                    //不允许向左移动
+                    return false;
                 }
-                
             }
-            //如果当前条下方格的状态部位1的话就返回可以下落
-            return true;
         }else if(col.length === 1){
+            //如果列的个数为1的话
             for(var m = 0;m<row.length;m++){
                 //获得行数
                 var mr = row[m];
+                //只要一个方格的左边的背景方格的状态为1的话就停止移动
+                if(this.backGroundArr[mr][col[0] - 1].isFilled === 1){
+                    //一个方格的左边背景方格的状态是1的话就说明不可以向左边移动
+                    return false;
+                }
             }
-            
-        }else if((this.nodeArr[up].y <= -this.nodeHeight/2 + this.prefabHeight)){
-            //撞到地面了
-            //停止方块的移动记录下当前处于哪一行那一列并改变这一行这一列的背景方格的状态
-            this.changeBackBlockStatus();
-            return false
         }
         return true;
     },
     //检测是否可以向右移动
     CheckIsRight : function(){
-
+        //获得当前的行数
+        var row = this.getRow();
+        //获得当前的列数
+        var col = this.getColumn();
+        //每下降一个格检测一次
+        //如果是横着的条就检测下面三个背景方格的属性isFilled是不是为1如果为1的话不允许下落
+        if(row.length === 1){
+            //遍历它的数组的状态
+            //遍历三个行对应的左一行是否为1
+            var nc = col[0];
+            //当列数是左边界是不用判断左边的背景网格的状态的
+            if(nc != 0){
+                //判断一下下一行的状态
+                if(this.backGroundArr[row[0]][nc - 1].isFilled === 1){
+                    //不允许向左移动
+                    return false;
+                }
+            }
+        }else if(col.length === 1){
+            //如果列的个数为1的话
+            for(var m = 0;m<row.length;m++){
+                //获得行数
+                var mr = row[m];
+                //只要一个方格的左边的背景方格的状态为1的话就停止移动
+                if(this.backGroundArr[mr][col[0] - 1].isFilled === 1){
+                    //一个方格的左边背景方格的状态是1的话就说明不可以向左边移动
+                    return false;
+                }
+            }
+        }
+        return true;
     },
     //生成下一个形状
     generateNext : function(parentNode,x,y){
         return this.createShape(parentNode,x,y);
 
-    },
-    // @brief 消行个数
-    rowsEliminated :function(backGrid, shape) {
-        var rownum = backGrid.length;
-        var colnum = backGrid[0].length;
-
-        var tx = shape.x;
-        var ty = shape.y;
-        var shapeArr = shape.shapeArr;
-
-        var eliminatedNum = 0;
-        var eliminatedGridNum = 0;
-        for ( var i = 0; i < rownum; i++) {
-            var flag = true;
-            for ( var j = 0; j < colnum; j++) {
-                if ( backGrid[i][j] === false ) {
-                    flag = false;
-                    break;
-                }
-            }
-            if ( flag === true ) {
-                eliminatedNum++;
-                if ( i >= ty && i < ty + 4 ) {
-                    for ( var s = 0; s < 4; s++ ) {
-                        if ( shapeArr[i - ty][s] === 1 ) {
-                            eliminatedGridNum++;
-                        }
-                    }
-                }
-            }
-        }
-        return eliminatedNum * eliminatedGridNum;
     },
 });
