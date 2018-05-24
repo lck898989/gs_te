@@ -3,6 +3,7 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
+        //预制体数组
         prefabArr : {
             default : [],
             type    : [cc.Prefab],
@@ -28,6 +29,8 @@ cc.Class({
         this.nodeWidth = this.node.width;
         this.nodeHeight = this.node.height;
         cc.log("this.nodeWidth is " + this.nodeWidth + "this.nodeHeight is " + this.nodeHeight);
+        //存放方格的颜色数组
+        this.boxColorArr = [];
         //背景二位数组
         this.backGroundArr = null;
         //形状集合二维数组,将每次生成的形状添加到二维数组里面
@@ -47,6 +50,8 @@ cc.Class({
         //创建下一个旋转体
         // this.nextShape = new Shape(this.nextShape,0,0);
         this.downFunction();
+        //当前条是否还可以改变状态
+        this.canChangeStatu = true;
     },
     //产生x坐标为[-250,-150,-50,50,150,250]
     createRandomX : function(randomNumber){
@@ -158,41 +163,6 @@ cc.Class({
                 return 0;    
         }
     },
-    // //检查是否触底
-    // setGridFilled : function(){
-    //     //获得当前下落的网格位置处于哪一列节省遍历次数
-    //     var indexArr = [];
-    //     indexArr = this.getColumn();
-    //     if(indexArr.length === 1){
-    //         //说明是竖条,获得列数
-    //         var column = indexArr[0];
-    //         cc.log("column is " + column);
-    //         cc.log("this.backGridArr is " + this.backGridArr);
-    //         for(var i = 9;i< 12;i++){
-    //             this.backGroundArr[i][column].isFilled = 1;
-    //         }
-    //     }else{
-    //         for(var m = 0;m < 3;m++){
-    //             var col = indexArr[m];
-    //         }
-    //     }
-    //     for(var i = 0;i < 12;i++){
-    //         //列检查
-    //         for(var j = 0;j < 6;j++){
-    //             for(var k = 0;k < this.nodeArr.length;k++){
-    //                 //如果当前网格的坐标等于节点数组中的坐标就把当前节点预制体的状态改为true
-    //                 if((this.backGroundArr[i][j].x === this.nodeArr[k].x) && (this.backGroundArr[i][j].y === this.nodeArr[k].y)){
-    //                        //将网格的填充状态重置为true
-    //                        this.backGroundArr[i][j].getComponent("Back").isFilled = 1;
-    //                     //    //返回不可下落状态
-    //                     //    return false;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     // //返回可下落状态 
-    //     // return true;
-    // },
     //初始化游戏场景主背景12行6列的网格
     createBack : function(){
         //初始化y坐标
@@ -245,6 +215,8 @@ cc.Class({
             cc.log("offSet is " + offSet);
             //产生0-3的随机数
             var index = Math.floor(Math.random()*3);
+            //将对应的颜色索引存放到该数组中
+            this.boxColorArr.push(index);
             cc.log("index is " + index);
             //将对应的预制体取出来转化为节点然后显示
             var prefabNode = this.createPrefab(this.prefabArr[index]);
@@ -282,38 +254,12 @@ cc.Class({
             this.updatePrefatY();
         },1);
     },
-    //消行的时候检查周边背景方格的状态
-    checkAroundStatu : function(){
-        for(var i = 0;i < 12;i++){
-            //列检查
-            for(var j = 0;j < 6;j++){
-                // for(var k = 0;k < this.nodeArr.length;k++){
-                //     //如果当前网格的坐标等于节点数组中的坐标就把当前节点预制体的状态改为true
-                //     // if((this.backGrid[i + 1][j].x === this.nodeArr[k].x) && (this.backGrid[i + 1][j].y === this.nodeArr[k].y)){
-                //     //        //返回不可下落状态
-                //     //        return false;
-                //     // }
-                //     if(this.backGrid[i + 1][j].getComponent("Back").isFilled === true){
-                //         //为不可下落状态
-                //         return false;
-                //     }
-                // }
-                //如果x坐标一样只比较最下面的y坐标
-                if((this.nodeArr[0].x === this.nodeArr[1].x)&&(this.nodeArr[2].x === this.nodeArr[1].x)){
-                    if(this.backGrid[i + 1][j].getComponent("Back").isFilled === 0){
-                        return false;
-                    }
-                }
-            }
-        }
-        //可以下落
-        return true;
-    },
     //更新预制体节点的y坐标
     updatePrefatY : function(dt){
         cc.log(this.nodeArr[0].y);
         //如果允许下落的话条的y坐标向下移动
         if(this.CheckIsDown()){
+            
             //位移3个方格
             for(var i = 0;i < 3;i++){
                 this.nodeArr[i].y -= this.speed;
@@ -354,47 +300,22 @@ cc.Class({
          * 旋转之后方块的颜色变换，第一个变成第二个，第二个变成第三个，第三个变成第一个
          * 
          * ** */
-        //创建一个循环队列
-        // var circularQueue = [];
-        // for(var i = 0;i<3;i++){
-        //     circularQueue.push(this.nodeArr[i]);
-
-        // }
-        //把之前的预制节点信息保存起来
-        var before0 = this.nodeArr[0];
-        var before1 = this.nodeArr[1];
-        var before2 = this.nodeArr[2];
-        this.nodeArr[0] = before2;
-        //重新设置精灵的坐标
-        this.nodeArr[0].y = before0.y;
-        this.nodeArr[1] = before0;
-        this.nodeArr[1].y = before1.y;
-        this.nodeArr[2] = before1;
-        this.nodeArr[2].y = before2.y;
-        // this.nodeArr = null;
-        //保留之前的坐标节点作为旋转的基础
-        // cc.log("中心点的坐标为:o" + this.nodeArr[1].x + "," + this.nodeArr[1].y);
-        // //第一个预制体节点的x,y坐标
-        // var changeBeforeX = this.nodeArr[0].x;
-        // var changeBeforeY = this.nodeArr[0].y;
-        // //第二个预制体节点的x,y坐标
-        // var changeBeforeX2 = this.nodeArr[2].x;
-        // var changeBeforeY2 = this.nodeArr[2].y;
-        // if(this.getColumn() != 0 && this.getColumn() != 5){
-        //     //遍历预制节点数组使它的x,y坐标都进行旋转，将第一个预制节点进行旋转
-        //     this.nodeArr[0].x = this.nodeArr[1].y - this.nodeArr[0].y + this.nodeArr[1].x;
-        //     cc.log("旋转后的x坐标是："+ this.nodeArr[0].x);
-        //     this.nodeArr[0].y = changeBeforeX - this.nodeArr[1].x + this.nodeArr[1].y;
-        //     cc.log("旋转后的y坐标是："+this.nodeArr[0].y);
-        //     //将第二个预制节点进行旋转
-        //     this.nodeArr[2].x = this.nodeArr[1].y - this.nodeArr[2].y + this.nodeArr[1].x;
-        //     this.nodeArr[2].y = changeBeforeX2 - this.nodeArr[1].x + this.nodeArr[1].y;
-        // }
+        cc.log(this.boxColorArr);
+        var before0 = this.nodeArr[0].color;
+        cc.log("before0 is " + before0);
+        var before1 = this.nodeArr[1].color;
+        cc.log("before1 is " + before1);
+        var before2 = this.nodeArr[2].color;
+        cc.log("before2 is " + before2);
+        //分别改变颜色
+        this.nodeArr[0].color = before2;
+        this.nodeArr[1].color = before0;
+        this.nodeArr[2].color = before1;
     },
     //左移方法
     moveLeft    : function(){
         for(var i = 0;i < this.nodeArr.length;i++){
-            if(this.CheckIsLeft()){
+            if(this.CheckIsLeft() && this.canChangeStatu){
                 this.nodeArr[i].x -= this.speed;
                 if((this.nodeArr[i].x <= -this.nodeWidth/2 + this.prefabHeight)){
                     this.nodeArr[i].x = -this.nodeWidth/2 + this.prefabHeight;
@@ -453,6 +374,14 @@ cc.Class({
             var colN = col[0];
             //如果最大的行号是11的话不用再这里判断这样的情况是触底的情况
             if(rowN != 11){
+                for(var i = 0;i<3;i++){
+                    if((this.nodeArr[i].y <= -this.nodeHeight/2 + this.prefabHeight)){
+                    //撞到地面了
+                    //停止方块的移动记录下当前处于哪一行那一列并改变这一行这一列的背景方格的状态
+                    this.changeBackBlockStatus();
+                    return false;
+                }
+            }
                 //如果最大行下方方格的状态为1的话就是不能下落
                 if(this.backGroundArr[rowN + 1][colN].isFilled === 1){
                     //将对应的背景方格的状态改为1
@@ -466,15 +395,6 @@ cc.Class({
                 return false;
             }
             
-        }else{
-            for(var i = 0;i<3;i++){
-                if((this.nodeArr[i].y <= -this.nodeHeight/2 + this.prefabHeight)){
-                    //撞到地面了
-                    //停止方块的移动记录下当前处于哪一行那一列并改变这一行这一列的背景方格的状态
-                    this.changeBackBlockStatus();
-                    return false;
-                }
-            }
         }
         return true;
     },
@@ -579,29 +499,77 @@ cc.Class({
                 return -250;
             case 1:
                 return -150;  
-            case 3:
+            case 2:
                 return -50;
-            case 4:
+            case 3:
                 return 50;   
-            case 5:
+            case 4:
                 return 150;
-            case 6:
+            case 5:
                 return 250;             
         }
     },
+    getLocationByRow:function(rowNumber){
+        switch(rowNumber){
+            case 0:
+                return -550;
+            case 1:
+                return -450;
+            case 2:
+                return -350;
+            case 3:
+                return -250;
+            case 4:
+                return -150;
+            case 5:
+                return -50;
+            case 6:
+                return 50;
+            case 7:
+                return 150;      
+            case 8:
+                return 250;
+            case 9:
+                return 350;
+            case 10:
+                return 450;
+            case 11:
+                return 550;            
+        }
+    }
     //快速下落:横条快速下落，竖条快速下落
     quickDown : function(){
         //获得当前列
         var currentCol = this.getColumn();
-        if(currentCol.length === 1){
-            var targetX = this.getLocationByCol(currentCol);
-            for(var i = 0;i<3;i++){
-                this.nodeArr[i].x = targetX;
-                // this.nodeArr[i].y = 
-            }
-        }else{
-
-        }
+        //获得当前行
+        var currentRow = this.getRow();
+        //获得最大行
+        var currentMaxRow = currentRow[2];
+        //获取最大值对应的坐标
+        var maxRowLocationY = this.getLocationByRow(currentMaxRow);
+        var colNu = this.getLocationByCol(currentCol);
+        var originPMax = cc.p(colNu,maxRowLocationY);
+        var originPMaxSO = cc.p(colNu,maxRowLocationY-100);
+        var originPMaxSO1 = cc.p(colNu,maxRowLocationY-200);
+        //从最大值下面的一行开始遍历看看背景方格中的属性是否为1
+        var targetY = this.getLocationByRow(this.checkGridIsOne(currentMaxRow,currentCol));
+        var downAction = cc.moveTo(0.5,cc.p(colNu,targetY));
+        var downActionOfpre = cc.moveTo(0.5,cc.p(colNu,targetY - 100));
+        var downActionOfPreP = cc.moveTo(0.5,cc.p(colNu,targetY - 200));
+        //顺序执行动作
+        cc.sequence(downAction,downActionOfpre,downActionOfPreP);
         
+
+    },
+    //检查某一行某一列下的网格属性是否为1
+    checkGridIsOne : function(row,col){
+        if(row < 11){
+            for(var i = row;i<11;i++){
+                //检查i行col列背景方格是否为1
+                if(this.backGroundArr[row][col].isFilled === 1){
+                    return row;
+                }
+            }
+        }
     }
 });
