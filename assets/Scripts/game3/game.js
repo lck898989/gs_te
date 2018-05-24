@@ -349,25 +349,47 @@ cc.Class({
     **/
     rotate       : function(){
         //判断周围的网格状态是否为true
+        /**
+         * 
+         * 旋转之后方块的颜色变换，第一个变成第二个，第二个变成第三个，第三个变成第一个
+         * 
+         * ** */
+        //创建一个循环队列
+        // var circularQueue = [];
+        // for(var i = 0;i<3;i++){
+        //     circularQueue.push(this.nodeArr[i]);
+
+        // }
+        //把之前的预制节点信息保存起来
+        var before0 = this.nodeArr[0];
+        var before1 = this.nodeArr[1];
+        var before2 = this.nodeArr[2];
+        this.nodeArr[0] = before2;
+        //重新设置精灵的坐标
+        this.nodeArr[0].y = before0.y;
+        this.nodeArr[1] = before0;
+        this.nodeArr[1].y = before1.y;
+        this.nodeArr[2] = before1;
+        this.nodeArr[2].y = before2.y;
+        // this.nodeArr = null;
         //保留之前的坐标节点作为旋转的基础
-        cc.log("中心点的坐标为：" + this.nodeArr[1].x + "," + this.nodeArr[1].y);
-        //第一个预制体节点的x,y坐标
-        var changeBeforeX = this.nodeArr[0].x;
-        var changeBeforeY = this.nodeArr[0].y;
-        //第二个预制体节点的x,y坐标
-        var changeBeforeX2 = this.nodeArr[2].x;
-        var changeBeforeY2 = this.nodeArr[2].y;
-        if(this.getColumn() != 0 && this.getColumn() != 5){
-            //遍历预制节点数组使它的x,y坐标都进行旋转，将第一个预制节点进行旋转
-            this.nodeArr[0].x = this.nodeArr[1].y - this.nodeArr[0].y + this.nodeArr[1].x;
-            cc.log("旋转后的x坐标是："+ this.nodeArr[0].x);
-            this.nodeArr[0].y = changeBeforeX - this.nodeArr[1].x + this.nodeArr[1].y;
-            cc.log("旋转后的y坐标是："+this.nodeArr[0].y);
-            //将第二个预制节点进行旋转
-            this.nodeArr[2].x = this.nodeArr[1].y - this.nodeArr[2].y + this.nodeArr[1].x;
-            this.nodeArr[2].y = changeBeforeX2 - this.nodeArr[1].x + this.nodeArr[1].y;
-        }
-        
+        // cc.log("中心点的坐标为:o" + this.nodeArr[1].x + "," + this.nodeArr[1].y);
+        // //第一个预制体节点的x,y坐标
+        // var changeBeforeX = this.nodeArr[0].x;
+        // var changeBeforeY = this.nodeArr[0].y;
+        // //第二个预制体节点的x,y坐标
+        // var changeBeforeX2 = this.nodeArr[2].x;
+        // var changeBeforeY2 = this.nodeArr[2].y;
+        // if(this.getColumn() != 0 && this.getColumn() != 5){
+        //     //遍历预制节点数组使它的x,y坐标都进行旋转，将第一个预制节点进行旋转
+        //     this.nodeArr[0].x = this.nodeArr[1].y - this.nodeArr[0].y + this.nodeArr[1].x;
+        //     cc.log("旋转后的x坐标是："+ this.nodeArr[0].x);
+        //     this.nodeArr[0].y = changeBeforeX - this.nodeArr[1].x + this.nodeArr[1].y;
+        //     cc.log("旋转后的y坐标是："+this.nodeArr[0].y);
+        //     //将第二个预制节点进行旋转
+        //     this.nodeArr[2].x = this.nodeArr[1].y - this.nodeArr[2].y + this.nodeArr[1].x;
+        //     this.nodeArr[2].y = changeBeforeX2 - this.nodeArr[1].x + this.nodeArr[1].y;
+        // }
     },
     //左移方法
     moveLeft    : function(){
@@ -444,11 +466,15 @@ cc.Class({
                 return false;
             }
             
-        }else if((this.nodeArr[up].y <= -this.nodeHeight/2 + this.prefabHeight)){
-            //撞到地面了
-            //停止方块的移动记录下当前处于哪一行那一列并改变这一行这一列的背景方格的状态
-            this.changeBackBlockStatus();
-            return false
+        }else{
+            for(var i = 0;i<3;i++){
+                if((this.nodeArr[i].y <= -this.nodeHeight/2 + this.prefabHeight)){
+                    //撞到地面了
+                    //停止方块的移动记录下当前处于哪一行那一列并改变这一行这一列的背景方格的状态
+                    this.changeBackBlockStatus();
+                    return false;
+                }
+            }
         }
         return true;
     },
