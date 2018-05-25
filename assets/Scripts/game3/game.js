@@ -584,7 +584,6 @@ cc.Class({
     //生成下一个形状
     generateNext : function(parentNode,x,y){
         return this.createShape(parentNode,x,y);
-
     },
     //通过列号获得对应的X坐标
     getLocationByCol:function(colNumber){
