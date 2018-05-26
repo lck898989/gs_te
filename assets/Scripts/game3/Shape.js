@@ -40,12 +40,13 @@
 //     // update (dt) {},
 // });
 //创建一个形体类
-function Shape(parentNode,x,y){
-    this.parentNode = parentNode;
-    this.x = x;
-    this.y = y;
+function Shape(prefabNode,type){
+    this.prefabNode = prefabNode;
+    this.x = prefabNode.x;
+    this.y = prefabNode.y;
     //是否允许变换
     this.allowRotate = true;
+    this.type = type;
 }
 //是否填充完方格
 Shape.prototype.isFilled = function(){
