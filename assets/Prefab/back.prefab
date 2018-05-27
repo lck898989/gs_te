@@ -28,7 +28,7 @@
       "__id__": 4
     },
     "_id": "",
-    "_opacity": 58,
+    "_opacity": 95,
     "_color": {
       "__type__": "cc.Color",
       "r": 255,
@@ -97,7 +97,7 @@
       "__id__": 1
     },
     "_enabled": true,
-    "isFilled": false
+    "isFilled": 0
   },
   {
     "__type__": "cc.PrefabInfo",

@@ -25,12 +25,12 @@
       "__id__": 3
     },
     "_id": "",
-    "_opacity": 171.615,
+    "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 8,
-      "g": 16,
-      "b": 199,
+      "r": 0,
+      "g": 0,
+      "b": 255,
       "a": 255
     },
     "_cascadeOpacityEnabled": true,
