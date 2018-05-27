@@ -72,6 +72,8 @@ cc.Class({
             }
             return false;
         }
+        //定义可以消除的方格的数量
+        this.canRemove = 0;
     },
     quickDownListener : function(){
         this.downButton.on('touchstart',function(){
@@ -508,9 +510,82 @@ cc.Class({
         //声明色块类型数组
         var colorBlockTypeArr = this.returnColorBlockArrByType(type);
         //生成待消队列
-        var waitRemoveQueue = this.find(shape.prefabNode,colorBlockTypeArr);   
-        //遍历待消队列找出满足条件的方格进行消除
+        var waitRemoveQueue = this.find(shape.prefabNode,colorBlockTypeArr);
+        //如果待消队列的长度大于2的时候检查是否可以消除
+        if(waitRemoveQueue.length > 2){
+            //遍历待消除队列
+            //随机选择两个点组成一个方程，再将剩余点依次代入方程看看剩余的点是否在这条直线方程上如果在这条直线方程上就进行消除
+            var random = this.createRandom(0,waitRemoveQueue.length);
+            this.willMovedArr = this.createMatrix(waitRemoveQueue.length,2,null);
+            //将待消队列返回出去
+            
 
+
+            //消除完之后将colorBlockTypeArr清空
+        }   
+
+    },
+    //查看待消队列是否可以消除
+    IsCanRemove : function(waitRemoveQueue,prefabNode){
+        //定义一个消除队列
+        var removeQueue = [];
+        var commonXCount = 0;
+        var commonYCount = 0;
+        var slantCommon = 0;
+        removeQueue.push(prefabNode);
+        for(var i = 0;i < waitRemoveQueue.length;i++){
+            cc.log("waitRemoveQueue's x is " + waitRemoveQueue[i].x);
+            cc.log("waitRemoveQueue's y is " + waitRemoveQueue[i].y);
+            if(prefabNode.x === waitRemoveQueue[i].x && prefabNode.y === waitRemoveQueue[i].y){
+                continue;
+            }
+            //横向检测
+            if(prefabNode.y === waitRemoveQueue[i].y && prefabNode.x != waitRemoveQueue[i].x){
+                removeQueue.push(waitRemoveQueue[i]);
+                commonYCount++;
+            }
+            //纵向检测
+            if(prefabNode.x === waitRemoveQueue[i].x && prefabNode.y != waitRemoveQueue[i].y){
+                removeQueue.push(waitRemoveQueue[i]);
+                commonXCount++;
+            }
+            //斜向检测45度方向
+            if(((prefabNode.x - waitRemoveQueue[i].x === 100)&&(prefabNode.y - waitRemoveQueue[i].y === 100))){
+                    var k = 1;
+                    removeQueue.push(waitRemoveQueue[i]);
+                    for(var j = 0;j<waitRemoveQueue.length;j++){
+                        if((waitRemoveQueue[j].x === prefabNode.x && waitRemoveQueue[j].y === prefabNode.y) ||
+                            (waitRemoveQueue[j].x === waitRemoveQueue[i].x && waitRemoveQueue[j].y === waitRemoveQueue[i].y)){
+                            continue;
+                        }else{
+                            var result;
+                            result = prefabNode.y - waitRemoveQueue[j].y - k *(prefabNode.x - waitRemoveQueue[j].x);
+                            if(result === 0){
+                                //可以斜着消
+                                removeQueue.push(waitRemoveQueue[j]);
+                            }
+                        }
+                    }
+            }
+            //斜向检测-45度方向
+            if(((prefabNode.x - waitRemoveQueue[i].x) === 100)&&(prefabNode.y + 100 === waitRemoveQueue[i].y)){
+                    var k = -1;
+                    removeQueue.push(waitRemoveQueue[i]);
+                    for(var j = 0;j<waitRemoveQueue.length;j++){
+                        if((waitRemoveQueue[j].x === prefabNode.x && waitRemoveQueue[j].y === prefabNode.y) ||
+                            (waitRemoveQueue[j].x === waitRemoveQueue[i].x && waitRemoveQueue[j].y === waitRemoveQueue[i].y)){
+                            continue;
+                        }else{
+                            var result;
+                            result = prefabNode.y - waitRemoveQueue[j].y - k *(prefabNode.x - waitRemoveQueue[j].x);
+                            if(result === 0){
+                                //可以斜着消
+                                removeQueue.push(waitRemoveQueue[j]);
+                            }
+                        }
+                    }
+            }
+        }
     },
     //根据色块类型返回色块类型数组方法
     returnColorBlockArrByType : function(type){
@@ -701,27 +776,4 @@ cc.Class({
             return 11;
         }
     },
-    
-    //生成方格类型数组
-    /**
-     * 如果有三种类型的方格就生成三个方格类型数组每个类型数组存放待消除的个数
-     * 如果有两种类型的方格就生成两个方格类型数组
-     * 如果有一种类型的方格就生成一个方格类型数组
-     */
-    typeArr : function(){
-        Array.prototype.setColor = function(colorType){
-            this.colorType = colorType;
-        }
-        Array.prototype.getColor = function(){
-            return this.colorType;
-        }
-        this.typeArr;
-        if(this.getColorCount() === 1){
-            //如果只有一种颜色的时候
-            this.oneTypeBoxArr.setColor(this.boxColorArr[0]);
-        }else if(this.getColorCount() === 2){
-
-        }
-
-    }   
 });
