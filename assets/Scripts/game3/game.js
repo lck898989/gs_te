@@ -254,6 +254,9 @@ cc.Class({
     },
     //定时器控制下落
     downFunction : function(nodeArr,time){
+        var promise = new Promise(function(resolve,reject){
+            
+        });
         //一秒下落一次
         this.schedule(function(){
             this.updatePrefatY(nodeArr);
@@ -589,8 +592,10 @@ cc.Class({
             
         }
         cc.log("willMoveNode is " + this.waitMove);
+        this.unscheduleAllCallbacks();
         //下降将要移动的节点数组
         this.xiaochuDown(this.waitMove);
+        this.unscheduleAllCallbacks();
     },
     xiaochuDown : function(willMoveNodeArr){
         this.downFunction(willMoveNodeArr,0.02);
