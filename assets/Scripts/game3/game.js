@@ -678,7 +678,7 @@ cc.Class({
     findPrefabNodeFromGameScene : function(row,col){
         var targetX = this.backGroundArr[row][col].prefabNode.x;
         var targetY = this.backGroundArr[row][col].prefabNode.y;
-        for(var i = 72;i<this.node.childrent.length;child++){
+        for(var i = 72;i<this.node.children.length;i++){
             //如果孩子节点的坐标等于目标节点的坐标的时候将这个节点返回回去
             if(this.node.children[i].x === targetX && this.node.children[i].y === targetY){
                 return this.node.children[i];
