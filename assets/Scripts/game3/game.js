@@ -519,6 +519,7 @@ cc.Class({
             if(len < 3){
                 continue;
             }else{
+                //有三个或者三个以上类型相同的宝石
                 //定义一个全局的等待消除的节点数组每次消除完之后将其还原
                 this.waitRemoveNodeArr = colorBlockTypeArr[i];
                 //证明是可以消除的
@@ -560,7 +561,39 @@ cc.Class({
     },
     //消除和下落操作
     removeAndDown : function(waitRemoveNodeArr){
+        //遍历待消除的队列进行消除
+        for(var i = 0;i<waitRemoveNodeArr.length;i++){
+            var row = this.getRow(waitRemoveNodeArr[i]);
+            var col = this.getColumn(waitRemoveNodeArr[i]);
 
+            //删除该节点
+            this.removeNodeFromGameScene(waitRemoveNodeArr[i]);
+            cc.log("删除节点是否成功：" + this.removeNodeFromGameScene(waitRemoveNodeArr[i]));
+            //将给节点下的背景方格属性改为0
+            this.backGroundArr[row][col].prefabNode.isFilled = 0;
+            this.backGroundArr[row][col].type = -1;
+            if(this.removeNodeFromGameScene(waitRemoveNodeArr[i])){
+                 //如果节点删除成功的话获得已经删除了的节点上方的节点数组依次下落
+                 var willmoveNodeArr = this.getWillRemoveUpNode(row,col);
+                 this.downFunction(willmoveNodeArr,0.02);
+            }
+            
+        }
+
+    },
+    //获得将要删除的节点上的节点数组
+    getWillRemoveUpNode : function(row,col){
+        var waitMoveNode = [];
+        while(row > 0){
+            row--;
+            if(this.backGroundArr[row][col].prefabNode.isFilled != 1){
+                break;
+            }else{
+                var shape = new Shape(this.findPrefabNodeFromGameScene(row,col),this.getTypeByColor(this.findPrefabNodeFromGameScene(row,col).color));
+                this.waitMoveNode.push(shape);
+            }
+        }
+        return waitMoveNode;
     },
      /*根据角度填充各个方向数组
      *@param :removeArr -->待消除队列
