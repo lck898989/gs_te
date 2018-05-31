@@ -271,6 +271,11 @@ cc.Class({
             self.updatePrefatY(nodeArr);
         }.bind(self),time);
     },
+    downUpNodes : function(nodeArr){
+        cc.log("#########################################");
+        cc.log("@@@@@@@@@@@@@@@@@@@@nodeArr is " + nodeArr);
+        this.updatePrefatY(nodeArr);
+    },
     // //计时器回调函数
     // callBack     : function(){
     //     this.updatePrefatY();
@@ -287,16 +292,20 @@ cc.Class({
                     nodeArr[i].prefabNode.y -= this.speed;
                 }
             }else{
-                //如果不能下落的话改变背景方格状态
+                //如果不能下落的话改变背景方格状态(背景方格更新完成之后进行再次生成节点数组)
                 this.changeBackBlockStatus(nodeArr);
-                //固定完之后重新生成随机预制体节点
-                this.nodeArr = this.generateNext(this.node,this.createRandomX(this.createRandom(0,6)),this.nodeHeight/2 - this.prefabHeight);
-                //开启计时器
-                this.downFunction(this.nodeArr,1);
-                //如果是不能下落的话就是前一个条形已经固定下来了，固定下来之前已经生成了下一个的形状
-                for(var j = 0;j<3;j++){
-                    this.nodeArr[j].prefabNode.y -= this.speed;
-                }
+                //1秒之后生成新的节点数组
+                this.scheduleOnce(function(){
+                    //固定完之后重新生成随机预制体节点
+                    this.nodeArr = this.generateNext(this.node,this.createRandomX(this.createRandom(0,6)),this.nodeHeight/2 - this.prefabHeight);
+                    //开启计时器
+                    this.downFunction(this.nodeArr,1);
+                    //如果是不能下落的话就是前一个条形已经固定下来了，固定下来之前已经生成了下一个的形状
+                    for(var j = 0;j<3;j++){
+                        this.nodeArr[j].prefabNode.y -= this.speed;
+                    }
+                },1);
+                
             }
         }
     },
@@ -534,6 +543,7 @@ cc.Class({
     },
     //消除和下落操作
     removeAndDown : function(waitRemoveNodeArr){
+        var self = this;
         if(this.isCommonX(waitRemoveNodeArr)){
             //如果在同一列上的情况
             //获得最上面的需要下落的节点数组
@@ -545,11 +555,17 @@ cc.Class({
             var bottomNode = waitRemoveNodeArr[waitRemoveNodeArr.length - 1];
             //如果最底下的节点的y坐标是-550的话
             var targetY = bottomNode.y;
-            for(var removeCount=0;removeCount<waitRemoveNodeArr.length;removeCount++){
-                this.removeNodeFromGameScene(waitRemoveNodeArr[removeCount]);
-            }
-            this.downFunction(tempMoveNode,0.0000005);
-            // this.verticalRemove(waitRemoveNodeArr,tempMoveNode,targetY);
+            // for(var removeCount=0;removeCount<waitRemoveNodeArr.length;removeCount++){
+            //     this.removeNodeFromGameScene(waitRemoveNodeArr[removeCount]);
+            // }
+            // (self.schedule(function(){
+            //     if(tempMoveNode != undefined){
+            //             self.downUpNodes(tempMoveNode);
+            //     }
+            // },0.5))();
+             
+            // window.setInterval(this.downUpNodes(tempMoveNode),500);
+            this.verticalRemove(waitRemoveNodeArr,tempMoveNode,targetY);
         }else{
             //如果不是同一列的话就遍历待消除的队列进行消除
             for(var i = 0;i<waitRemoveNodeArr.length;i++){
@@ -566,8 +582,18 @@ cc.Class({
                     //如果节点删除成功的话获得已经删除了的节点上方的节点数组依次下落
                     var willmoveNodeArr = this.getWillRemoveUpNode(row,col);
                     //  this.eliminateDown(willmoveNodeArr);
-                    this.downFunction(willmoveNodeArr,0.0000005);
-                    // this.downWillMoveNodeArr(willmoveNodeArr); 
+                    // (self.schedule(function(){
+                    //     if(willmoveNodeArr != undefined)
+                    //     self.downUpNodes(willmoveNodeArr);
+                    // },0.5))();
+                    // self.schedule((function(){
+                    //     if(willmoveNodeArr != undefined)
+                    //     self.downUpNodes(willmoveNodeArr);
+                    // })(),0.5);
+                    
+                    
+                    // window.setInterval(this.downUpNodes(tempMoveNode),500);
+                    this.downWillMoveNodeArr(willmoveNodeArr); 
                 }
             }
         }
@@ -596,11 +622,13 @@ cc.Class({
                 this.backGroundArr[currentNodeRow][col].type = this.getTypeByColor(tempMoveNode[i].prefabNode.color);
             }
             this.changeBackBlockStatus(tempMoveNode);
+        }else{
+            //直接删除这几个节点
+            for(var removeCount=0;removeCount<waitRemoveNodeArr.length;removeCount++){
+                this.removeNodeFromGameScene(waitRemoveNodeArr[removeCount]);
+            }
         }
-        //直接删除这几个节点
-        for(var removeCount=0;removeCount<waitRemoveNodeArr.length;removeCount++){
-            this.removeNodeFromGameScene(waitRemoveNodeArr[removeCount]);
-        }
+        
         
     },
     //检查待消除的节点数组是否在同一列上
@@ -805,64 +833,7 @@ cc.Class({
           }
           
     },
-    /*
-            更新地图方法并且将该节点从其父节点中移出
-      因为消除动作需要进行更新地图操作
-      @param : removeNode --- > 待消除的节点
-      @param : row        ---->当前节点的行号
-      @param ：col        ---->当前节点的列号 
-     */
-    updateMap : function(removeNode,row,col){
-        //该节点上的预制节点的位置变化对每一个节点上的位置进行判断
-        this.moveDownUpOfRemoveNode(removeNode,row,col);
-        //从场景父节点上删除指定节点
-        this.removeNodeFromGameScene(removeNode);
-        cc.log(this.removeNodeFromGameScene(removeNode));
-    },
-    /*
-            移动将要消除方格的上方方块
-        @param: removeNode ----> 将要消除的方块
-        @param: row        ---->将要消除方块的行
-        @param: col        ---->将要消除方块的列
-    */
-    moveDownUpOfRemoveNode : function(removeNode,row,col){
-        //待下落方块的数组（背景方格的属性）
-        var waitDownBlock = [];
-        //重置nodeArr
-        this.waitMove = [];
-        while(row > 0){
-            //上一行
-            row = row - 1;
-            var upBlock = this.backGroundArr[row][col];
-            if(upBlock.prefabNode.isFilled === 1){
-                waitDownBlock.push(upBlock);
-            }else{
-                break;
-            }
-        }
-        for(var i = 0;i<waitDownBlock.length;i++){
-            //将背景方格的颜色属性设置为初始值
-            waitDownBlock[i].prefabNode.color = cc.Color.WHITE;
-            waitDownBlock[i].prefabNode.opacity = 50;
-            waitDownBlock[i].prefabNode.isFilled = 0;
-            waitDownBlock[i].type = -1;
-        }
-        //从节点树中找出对应的节点(这就是将要移动的节点)
-        for(var child = 72;child < this.node.children.length;child++){
-            for(var co = 0 ;co < waitDownBlock.length;co++){
-                if(this.node.children[child].x === waitDownBlock[co].prefabNode.x && 
-                this.node.children[child].y === waitDownBlock[co].prefabNode.y){
-                var shape = new Shape(this.node.children[child],this.getTypeByColor(this.node.children[child].color));
-                this.waitMove.push(shape);
-                // this.node.children[child].destroy();
-                }
-            }
-        }
-        cc.log("willMoveNode is " + this.waitMove);
-        this.unscheduleAllCallbacks();
-        //下降将要移动的节点数组
-        this.eliminateDown(this.waitMove);
-    },
+   
     getTypeByColor : function(color){
         var colorValue = color.toHEX("#rrggbb").toLocaleUpperCase();
         cc.log("------------>colorValue is " +colorValue);
@@ -875,74 +846,6 @@ cc.Class({
                 return 1;        
         }
 
-    },
-    /*
-      消除下落逻辑
-      改变y坐标
-      设置背景方格的状态（颜色，是否填充（0，1））
-      下落完毕后检查是否还可以消除（如果可以消除接着下落）
-    */
-    eliminateDown : function(willMoveShapes){
-        // var self = this;
-        // var promise = new Promise(function(resolve,reject){
-        //     cc.log("8***********************8");
-        //     self.downFunction(willMoveShapes,0.02);
-        // });
-        // return promise;
-        //如果待下落数组的长度不为零的话就下降操作
-        if(willMoveShapes.length != 0){
-            //获得最底下的方格的行和列
-            var row = this.getRow(willMoveShapes[willMoveShapes.length - 1]);
-            var col = this.getColumn(willMoveShapes[willMoveShapes.length - 1]);
-            while(this.backGroundArr[row][col].prefabNode.isFilled != 1 && (row < 11)){
-                row++;
-            }
-            //如果最后一行没有填充颜色
-            if(row === 11 && this.backGroundArr[row][col].prefabNode.isFilled != 1){
-                //获得行号列号对应的y坐标
-                var targetY = this.backGroundArr[row][col].y;
-            }else{
-                //获取上面一个方格的y坐标
-                var targetY = this.backGroundArr[row-1][col].y;
-            }
-            //循环设置待下落数组的坐标
-            for(var i = willMoveShapes.length-1;i>=0;i--){
-                willMoveShapes[i].prefabNode.setPositionY(targetY+i*100);
-            }
-            for(var count =0;count < willMoveShapes.length;count++){
-                //待下落的方块
-                var rowNumber = this.getRow(willMoveShapes[count].prefabNode);
-                var colNumber = this.getColumn(willMoveShapes[count].prefabNode);
-                this.backGroundArr[rowNumber][colNumber].prefabNode.isFilled = 1;
-                this.backGroundArr[rowNumber][colNumber].type = willMoveShapes[count].type;
-            }
-            // //设置背景方格的状态并且检查是否可以重复消除，可以消除的话删除对应的节点
-            // this.changeBackBlockStatus(willMoveShapes);
-        }
-        
-    },
-   
-    /**
-     * 
-      查找一个给定坐标的精灵
-     */
-    findOneBoxInTheShapeArr : function(startRow,col){
-        //得到要删除的精灵坐标
-        var xLocation = this.getLocationByRow(startRow);
-        var yLocation = this.getLocationByCol(col);
-        //遍历所有的形状数组找到对应的坐标节点
-        for(var i =0;i<this.shapeArr.length;i++){
-            for(var j = 0;j<this.shapArr[i].length;j++){
-                if((xLocation === this.shapeArr[i][j].x) && (yLocation === this.shapeArr[i][j].y)){
-                    //将背景方格的属性设置为0
-                    this.backGroundArr[startRow][col].isFilled = 0;
-                    //如果找到该精灵的话就把该精灵所在的形状节点的该精灵pop出该形状数组
-                    
-                    var willDeleteSprite = this.shapeArr[i][j];  //将二维数组的i返回出去
-                }
-            }
-        }
-        return null;
     },
     /**
        检测是否可以向左移动
@@ -1036,19 +939,6 @@ cc.Class({
                 return 550;            
         }
     },
-    //检查某一行某一列下的网格属性是否为1
-    checkGridIsOne : function(row,col){
-        if(row < 11){
-            for(var i = row;i<11;i++){
-                //检查i行col列背景方格是否为1
-                if(this.backGroundArr[row][col].isFilled === 1){
-                    return row;
-                }
-            }
-        }else{
-            return 11;
-        }
-    },
     //根据方块类型得到对应的类型数组
     getTypeArrByType : function(type){
         switch(type){
@@ -1060,59 +950,4 @@ cc.Class({
                 return this.type2Arr;        
         }
     },
-    // //当前方格节点周围是不是有相同的颜色(方块停止的时候)
-    // hasCommonColor :  function(shape,row,col){
-    //     //创建一个8行2列的二维数组
-    //     this.directoArr = this.createMatrix(8,2,null);
-    //     this.directoArr[0][0]=row-1;
-    //     this.directoArr[0][1]=col-1;
-    //     this.directoArr[1][0]=row-1;
-    //     this.directoArr[1][1]=col;
-    //     this.directoArr[2][0]=row-1;
-    //     this.directoArr[2][1]=col+1;
-    //     this.directoArr[3][0]=row;
-    //     this.directoArr[3][1]=col-1;
-    //     this.directoArr[4][0]=row;
-    //     this.directoArr[4][1]=col+1;
-    //     this.directoArr[5][0]=row+1;
-    //     this.directoArr[5][1]=col-1;
-    //     this.directoArr[6][0]=row+1;
-    //     this.directoArr[6][1]=col;
-    //     this.directoArr[7][0]=row+1;
-    //     this.directoArr[7][1]=col+1;
-    //     var color = shape.prefabNode.color;
-
-    //     //两个点的最长就是100*sin(45);
-    //     var mostLong = node.width*Math.sin(45*Math.PI/180)*2;
-    //     var angle = 0;
-    //     //遍历八个方向
-    //     for(var i = 0;i<3;i++){
-    //             var rx = node.x + 100;
-    //             var lx = node.x - 100;
-            
-
-    //     }
-    // },
-    // //生成方格类型数组
-    // /**
-    //  * 如果有三种类型的方格就生成三个方格类型数组每个类型数组存放待消除的个数
-    //  * 如果有两种类型的方格就生成两个方格类型数组
-    //  * 如果有一种类型的方格就生成一个方格类型数组
-    //  */
-    // typeArr : function(){
-    //     Array.prototype.setColor = function(colorType){
-    //         this.colorType = colorType;
-    //     }
-    //     Array.prototype.getColor = function(){
-    //         return this.colorType;
-    //     }
-    //     this.typeArr;
-    //     if(this.getColorCount() === 1){
-    //         //如果只有一种颜色的时候
-    //         this.oneTypeBoxArr.setColor(this.boxColorArr[0]);
-    //     }else if(this.getColorCount() === 2){
-
-    //     }
-
-    // }   
 });
