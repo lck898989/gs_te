@@ -47,6 +47,7 @@ function Shape(prefabNode,type){
     //是否允许变换
     this.allowRotate = true;
     this.type = type;
+    this.waitRemove = false;
 }
 //是否填充完方格
 Shape.prototype.isFilled = function(){
