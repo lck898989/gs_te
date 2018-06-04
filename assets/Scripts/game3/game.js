@@ -636,6 +636,7 @@ cc.Class({
             for(let cd = 0;cd < waitRemoveNodeArr.length;cd++){
                 //获取待下落的节点数组
                 var willMoveNodes = this.getWillRemoveUpNode(this.getRow(waitRemoveNodeArr[cd].prefabNode),this.getColumn(waitRemoveNodeArr[cd].prefabNode));
+                cc.log("!!!!!!!!willMoveNodes is " + willMoveNodes);
                 // willMoveNodes.reverse();
                 //依次下落待消除节点以上的节点
                 for(let t = 0;t<willMoveNodes.length;t++){
@@ -671,6 +672,9 @@ cc.Class({
                 }
                 //保证顺序是行依次增大的
                 willMoveNodes.reverse();
+                for(let j = 0;j<willMoveNodes.length;j++){
+                    cc.log("消除后下落的节点坐标为：" + willMoveNodes[j].y);
+                }
                 // this.changeBackBlockStatus(willMoveNodes);
             }
             this.type0Arr = [];
@@ -827,6 +831,9 @@ cc.Class({
             if(this.node.children[child].x === waitRemoveNode.x && this.node.children[child].y === waitRemoveNode.y){
                  //销毁该节点
                  this.node.children[child].destroy();
+
+                 cc.log("%%%%%%%%%%%%%%%" + this.node.children[child].x);
+                 cc.log("%%%%%%%%%%%%%%%" + this.node.children[child].y);
                 //  waitRemoveNode.color = cc.Color.WHITE;
                 //  waitRemoveNode.opacity = 50;
                  //从节点树的孩子移出该节点防止下次遍历出错
