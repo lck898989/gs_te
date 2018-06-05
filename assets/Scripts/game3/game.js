@@ -895,29 +895,28 @@ cc.Class({
                     cc.log(this.backGroundArr[row][col].prefabNode.isFilled + "******" + this.backGroundArr[row][col].type);
                     //销毁该节点
                      this.node.children[child].destroy();
-                     if(this.isCommonX(1,backArr)){
-                         //如果是同一列的话upNodes就初始化一次
-    
-                     }
                     //找到上面的格子
                     cc.log("upNodes is " + upNodes.length);
-                    //下落格子
-                    for(var i = 0;i<upNodes.length;i++){
-                        //改变背景方格的状态
-                        this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].prefabNode.isFilled = 0;
-                        this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].type = -1;
-                        upNodes[i].prefabNode.y -= 100;
-                        upNodes[i].y = upNodes[i].prefabNode.y;
-                        this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].prefabNode.isFilled = 1;
-                        this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].type = upNodes[i].type;
+                    if(upNodes.length != 0){
+                        //下落格子
+                        for(var i = 0;i<upNodes.length;i++){
+                            //改变背景方格的状态
+                            this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].prefabNode.isFilled = 0;
+                            this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].type = -1;
+                            upNodes[i].prefabNode.y -= 100;
+                            upNodes[i].y = upNodes[i].prefabNode.y;
+                            this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].prefabNode.isFilled = 1;
+                            this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].type = upNodes[i].type;
+                        }
+                        cc.log("%%%%%%%%%%%%%%%" + this.node.children[child].x);
+                        cc.log("%%%%%%%%%%%%%%%" + this.node.children[child].y);
+                        //  waitRemoveNode.color = cc.Color.WHITE;
+                        //  waitRemoveNode.opacity = 50;
+                        //从节点树的孩子移出该节点防止下次遍历出错
+                        //  this.node.children.splice(child,1);
+                        break;
                     }
-                     cc.log("%%%%%%%%%%%%%%%" + this.node.children[child].x);
-                     cc.log("%%%%%%%%%%%%%%%" + this.node.children[child].y);
-                    //  waitRemoveNode.color = cc.Color.WHITE;
-                    //  waitRemoveNode.opacity = 50;
-                     //从节点树的孩子移出该节点防止下次遍历出错
-                     //  this.node.children.splice(child,1);
-                     break;
+                    
                 }
             }
         }else{
