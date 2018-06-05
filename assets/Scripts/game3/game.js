@@ -477,12 +477,7 @@ cc.Class({
                 //如果该节点上满足消除条件
                 if(this.canRemove(nodeArr[m],this.colorBlockTypeArr)){
                     this.findDiffFromRemoveNode(nodeArr,this.getTypeByColor(this.waitRemoveNodeArr[0].prefabNode.color),this.willMoveNodes);
-                    if(this.willMoveNodes.length === 0){
-                        //如果是一列三个相同类型的话直接消除
-                        for(let c = 0;c<this.waitRemoveNodeArr.length;c++){
-                            this.removeNodeFromGameScene(this.waitRemoveNodeArr[c].prefabNode);
-                        }
-                    }
+                    
                     var targetY = this.waitRemoveNodeArr[this.waitRemoveNodeArr.length-1].y;
                     //定义是否可以退出当前循环
                     var canBreak = false;
@@ -519,11 +514,17 @@ cc.Class({
                 //如果待消除队列是一列的话执行该代码
                 if(this.willMoveNodes.length != 0){
                     cc.log(this.willMoveNodes);
-                    // this.willMoveNodes.reverse();
+                    this.willMoveNodes.reverse();
                     this.removeAndDown(this.waitRemoveNodeArr,this.willMoveNodes);
                     }
 
                 }
+                // if(this.willMoveNodes.length === 0){
+                //     //如果是一列三个相同类型的话直接消除
+                //     for(let c = 0;c<this.waitRemoveNodeArr.length;c++){
+                //         this.removeNodeFromGameScene(this.waitRemoveNodeArr[c].prefabNode);
+                //     }
+                // }
                 //确保行数是依次增大的
                 this.willMoveNodes.reverse();
                 //查看是否可以重复消除
@@ -881,6 +882,7 @@ cc.Class({
     //从父节点清除符合条件的节点
     removeNodeFromGameScene : function(waitRemoveNode,backArr){
         if(arguments.length === 3){
+            //shape类型
              var upNodes = arguments[2];
              cc.log("upNodes is " + upNodes);
              for(var child = 72;child < this.node.children.length;child++){
@@ -902,11 +904,12 @@ cc.Class({
                     //下落格子
                     for(var i = 0;i<upNodes.length;i++){
                         //改变背景方格的状态
-                        this.backGroundArr[this.getRow(upNodes[i])][this.getColumn(upNodes[i])].prefabNode.isFilled = 0;
-                        this.backGroundArr[this.getRow(upNodes[i])][this.getColumn(upNodes[i])].type = -1;
+                        this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].prefabNode.isFilled = 0;
+                        this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].type = -1;
                         upNodes[i].prefabNode.y -= 100;
-                        this.backGroundArr[this.getRow(upNodes[i])][this.getColumn(upNodes[i])].prefabNode.isFilled = 1;
-                        this.backGroundArr[this.getRow(upNodes[i])][this.getColumn(upNodes[i])].type = upNodes[i].type;
+                        upNodes[i].y = upNodes[i].prefabNode.y;
+                        this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].prefabNode.isFilled = 1;
+                        this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].type = upNodes[i].type;
                     }
                      cc.log("%%%%%%%%%%%%%%%" + this.node.children[child].x);
                      cc.log("%%%%%%%%%%%%%%%" + this.node.children[child].y);
@@ -941,6 +944,7 @@ cc.Class({
                         this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].prefabNode.isFilled = 0;
                         this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].type = -1;
                         upNodes[i].prefabNode.y -= 100;
+                        upNodes[i].y = upNodes[i].prefabNode.y;
                         this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].prefabNode.isFilled = 1;
                         this.backGroundArr[this.getRow(upNodes[i].prefabNode)][this.getColumn(upNodes[i].prefabNode)].type = upNodes[i].type;
                     }
