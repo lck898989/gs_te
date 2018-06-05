@@ -917,6 +917,7 @@ cc.Class({
                     //  waitRemoveNode.opacity = 50;
                      //从节点树的孩子移出该节点防止下次遍历出错
                      //  this.node.children.splice(child,1);
+                     break;
                 }
             }
         }else{
