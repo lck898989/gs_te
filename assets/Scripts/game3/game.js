@@ -31,6 +31,8 @@ cc.Class({
     },
     // use this for initialization
     onLoad: function () {
+        //消除之后待下落数组的集合
+        this.afterMoveNodeArr = [];
         this.myyy=0;
         this.myy = ['3'];
         this.nodeWidth = this.node.width;
@@ -527,6 +529,7 @@ cc.Class({
                         cc.log(this.willMoveNodes);
                         this.willMoveNodes.reverse();
                         this.removeAndDown(this.waitRemoveNodeArr,this.willMoveNodes);
+                        // this.changeBackBlockStatus(this.willMoveNodes);
                     }else{
                         for(let j =0;j<this.waitRemoveNodeArr.length;j++){
                             this.directDeletNodeFromGameScene(this.waitRemoveNodeArr[j]);
@@ -637,14 +640,24 @@ cc.Class({
                  for(let m = 0;m<waitRemoveNodeArr.length;m++){
                     x = this.removeNodeFromGameScene(waitRemoveNodeArr[m].prefabNode,arguments[1]);
                 }
-
+                //同一列的待消节点上方的待下落节点全都下落完毕检查是否可以连消传入的参数也是一个形状数组
+                cc.log("arguments is " + arguments[1]);
+                arguments[1].reverse();
+                //将之前的this.waitRemoveNodeArr置空
+                this.waitRemoveNodeArr = [];
+                this.changeBackBlockStatus(arguments[1]);
              }else{
-                //删除需要消除的节点
+                //删除需要消除的节点,不是同一列的情况下每下落一个待消节点上方的待移动节点检查一遍是否可以重复消除
                 for(let m = 0;m<waitRemoveNodeArr.length;m++){
                     //删除一个节点然后接着下落上面的节点
                     x = this.removeNodeFromGameScene(waitRemoveNodeArr[m].prefabNode);
-                    
                 }
+                //将之前的this.waitRemoveNodeArr置空
+                this.waitRemoveNodeArr = [];
+                for(let i = 0;i<this.afterMoveNodeArr.length;i++){
+                    this.changeBackBlockStatus(this.afterMoveNodeArr[i]);
+                }
+                this.afterMoveNodeArr = [];
              }
             this.type0Arr = [];
             this.type1Arr = [];
@@ -865,9 +878,10 @@ cc.Class({
         var deleteShape = new Shape(waitRemoveNode,this.getTypeByColor(waitRemoveNode.color));
         this.willDeleteArr.push(deleteShape);
         //查找待消除节点上方的待下落方块时候看看是否在willDeleteArr里面如果再的话就不找了
-        if(arguments.length === 3){
+        if(arguments.length === 2){
+            //如果待消节点是处于同一列的时候让上面的节点下落完毕再进行判断是否可以连消
             //shape类型
-             var upNodes = arguments[2];
+             var upNodes = arguments[1];
              cc.log("upNodes is " + upNodes);
              for(var child = 72;child < this.node.children.length;child++){
                 if(this.node.children[child].x === waitRemoveNode.x && this.node.children[child].y === waitRemoveNode.y){
@@ -936,6 +950,8 @@ cc.Class({
                     //  waitRemoveNode.opacity = 50;
                      //从节点树的孩子移出该节点防止下次遍历出错
                      //  this.node.children.splice(child,1);
+                     //检查是否可以重复消除如果可以连消的话进行连消
+                     this.afterMoveNodeArr.push(upNodes);
                     return upNodes;
                 }
             }
